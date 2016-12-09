@@ -36,21 +36,15 @@ class Ci_stripe {
     \Stripe\Stripe::setApiKey($this->stripe_config['api_key']);
   }
 
-  /**
-  * Create a new customer.
-  *
-  * Returns a customer object as documented at https://stripe.com/docs/api/php#create_customer
-  *
-  * @param array $params array containing customer information
-	*
-  * @return object customer info
-  */
-	function customer_create($params) {
-		if(isset($params)) {
-      return $this->sendRequest('Customer', 'create', $params);
-		}
-		return "One or more parameters are not set";
-	}
+  function callStripe($endpoint, $method, $params = null){
+    $response = $this->sendRequest($endpoint, $method, $params);
+    if($response['status'] == 'ok') {
+      $response['message'] = json_decode($response['message']->__toJSON(),true);
+      return $response;
+    } else {
+      return $response;
+    }
+  }
 
   /**
   * Send Request to Stripe Service
@@ -63,7 +57,7 @@ class Ci_stripe {
 	*
   * @return array a formatted reponse
   */
-  function sendRequest($endpoint, $method, $params) {
+  private function sendRequest($endpoint, $method, $params = null) {
     try {
       //\Stripe\Customer::create($request);
       $namespace = '\Stripe\\'.$endpoint;
